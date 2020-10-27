@@ -7,14 +7,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-function validateLike(request, response, next) {
-  const { likes } = request.body;
-
-  if (likes > 0) return (likes = 0);
-
-  return next();
-}
-
 const repositories = [];
 
 app.get("/repositories", (request, response) => {
@@ -31,11 +23,11 @@ app.post("/repositories", (request, response) => {
   return response.status(200).json(repository);
 });
 
-app.put("/repositories/:id", validateLike, (request, response) => {
+app.put("/repositories/:id", (request, response) => {
   const { id } = request.params;
   const { title, url, techs } = request.body;
 
-  if (validate(id)) {
+  if (!validate(id)) {
     return response.status(400).json({ message: "value id invalid." });
   }
 
@@ -46,7 +38,13 @@ app.put("/repositories/:id", validateLike, (request, response) => {
   if (repositoryIndex < 0)
     return response.status(400).json({ message: "Repository Not Found." });
 
-  const repository = { title, url, techs };
+  const repository = {
+    ...repositories[repositoryIndex],
+    title,
+    url,
+    techs,
+  };
+
   repositories[repositoryIndex] = repository;
 
   return response.json(repository);
